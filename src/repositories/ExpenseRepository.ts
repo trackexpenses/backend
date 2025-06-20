@@ -11,4 +11,24 @@ export class ExpenseRepository extends Repository<any> {
     async addExpense(tx: Prisma.TransactionClient, data: { amount: number; description: string; userId: number }) {
         return tx.expense.create({ data });
     }
+
+    async getUserExpenses(userId: number) {
+        const expenses = await this.findMany({
+            where: { userId },
+            include: {
+                tags: {
+                    select: {
+                        tag: {
+                            select: {
+                                name: true,
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return expenses
+    }
+
 }

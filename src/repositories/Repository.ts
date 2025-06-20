@@ -17,8 +17,11 @@ export class Repository<T> {
     return this.model.findFirst({ where: filter });
   }
 
-  async findMany(options?: any): Promise<T[]> {
-    return this.model.findMany({ where: options?.filter || {} });
+
+  async findMany(
+    options?: any
+  ): Promise<T[]> {
+    return this.model.findMany(options || {});
   }
 
   async create(data: Partial<T>): Promise<T> {

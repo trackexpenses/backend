@@ -32,6 +32,14 @@ class ExpenseController {
         }
         res.status(201).send({ expense });
     }
+    @httpGet("/")
+    public async getExpenses(req: express.Request, res: express.Response) {
+        const user = (req as any).user as User
+
+        const expenses = await this.expenseService.getUserExpenses(user.id)
+
+        res.status(200).send({ expenses });
+    }
 }
 
 export { ExpenseController };

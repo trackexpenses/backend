@@ -14,6 +14,7 @@ import prisma from "../database/prismaClient";
 import { Prisma } from "@prisma/client";
 import { TagRepository } from "../repositories/TagRepository";
 import { ExpenseTagRepository } from "../repositories/ExpenseTagRepository";
+import ExpenseMapper from "../mappers/ExpenseMapper";
 
 
 @injectable()
@@ -23,6 +24,7 @@ export default class ExpenseService {
         @inject(TYPES.ExpenseRepository) private expenseRepository: ExpenseRepository,
         @inject(TYPES.TagRepository) private tagRepository: TagRepository,
         @inject(TYPES.ExpenseTagRepository) private expenseTagRepository: ExpenseTagRepository,
+        @inject(TYPES.ExpenseMapper) private expenseMapper: ExpenseMapper,
 
     ) { }
 
@@ -56,5 +58,15 @@ export default class ExpenseService {
             return false
         }
         return true
+    }
+
+    public async getUserExpenses(userId: number) {
+        const expenses = await this.expenseRepository.getUserExpenses(userId);
+
+        const mappedExpenses = await Promise.all(
+            expenses.map(expense => this.expenseMapper.toDto(expense))
+        );
+
+        return mappedExpenses;
     }
 }
