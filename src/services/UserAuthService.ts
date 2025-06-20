@@ -78,14 +78,14 @@ export default class UserAuthService {
 
     private generateRefreshToken(): string {
         const payload = { refreshToken: uid(256) };
-        return JwtHelper.sign(payload, config.jwt.refreshTokenValidPeriod);
+        return JwtHelper.sign(payload);
     }
 
     private generateAccessToken(userId: number): string {
         const payload = {
             userId: userId.toString(),
         }
-        return JwtHelper.sign(payload, config.jwt.accessTokenValidPeriod);
+        return JwtHelper.sign(payload);
     }
 
 }

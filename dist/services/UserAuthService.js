@@ -26,7 +26,6 @@ const types_1 = __importDefault(require("../container/types"));
 const IUser_1 = require("../models/IUser");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const constants_1 = require("../constants");
-const config_1 = __importDefault(require("../config"));
 const JwtHelper_1 = __importDefault(require("../utils/JwtHelper"));
 const rand_token_1 = require("rand-token");
 let UserAuthService = class UserAuthService {
@@ -87,13 +86,13 @@ let UserAuthService = class UserAuthService {
     }
     generateRefreshToken() {
         const payload = { refreshToken: (0, rand_token_1.uid)(256) };
-        return JwtHelper_1.default.sign(payload, config_1.default.jwt.refreshTokenValidPeriod);
+        return JwtHelper_1.default.sign(payload);
     }
     generateAccessToken(userId) {
         const payload = {
             userId: userId.toString(),
         };
-        return JwtHelper_1.default.sign(payload, config_1.default.jwt.accessTokenValidPeriod);
+        return JwtHelper_1.default.sign(payload);
     }
 };
 UserAuthService = __decorate([
