@@ -18,7 +18,7 @@ export default class JwtHelper {
 
         return jwt.sign(
             payload,
-            config.jwt.privateKey as Secret,
+            config.jwt.secretKey as Secret,
             signOptions
         )
     }
@@ -30,7 +30,7 @@ export default class JwtHelper {
         var decodedToken;
 
         try {
-            decodedToken = jwt.verify(token, config.jwt.publicKey as Secret) as object;
+            decodedToken = jwt.verify(token, config.jwt.secretKey as Secret) as object;
         } catch (e) {
 
             if (e instanceof TokenExpiredError) {
