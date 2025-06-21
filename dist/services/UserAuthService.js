@@ -41,7 +41,7 @@ let UserAuthService = class UserAuthService {
                     email: userParams.email,
                     password: yield this.hashPassword(userParams.password)
                 });
-                const mappedUser = yield this.userMapper.toDto(user);
+                const mappedUser = this.userMapper.toDto(user);
                 const device = this.getDeviceTokens(user.id);
                 return { user: mappedUser, status: IUser_1.ApiStatus.SUCCESS, device };
             }
@@ -67,7 +67,7 @@ let UserAuthService = class UserAuthService {
                 return { status: IUser_1.ApiStatus.FAILURE, errorMessage: 'Invalid email or password' };
             }
             const device = this.getDeviceTokens(user.id);
-            return { user: yield this.userMapper.toDto(user), status: IUser_1.ApiStatus.SUCCESS, device };
+            return { user: this.userMapper.toDto(user), status: IUser_1.ApiStatus.SUCCESS, device };
         });
     }
     hashPassword(plainPassword) {

@@ -43,7 +43,7 @@ class JwtHelper {
         if (expiresIn) {
             signOptions.expiresIn = expiresIn;
         }
-        return jsonwebtoken_1.default.sign(payload, config_1.default.jwt.privateKey, signOptions);
+        return jsonwebtoken_1.default.sign(payload, config_1.default.jwt.secretKey, signOptions);
     }
     static verify(token) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -51,7 +51,7 @@ class JwtHelper {
             var expired = false;
             var decodedToken;
             try {
-                decodedToken = jsonwebtoken_1.default.verify(token, config_1.default.jwt.publicKey);
+                decodedToken = jsonwebtoken_1.default.verify(token, config_1.default.jwt.secretKey);
             }
             catch (e) {
                 if (e instanceof jsonwebtoken_1.TokenExpiredError) {

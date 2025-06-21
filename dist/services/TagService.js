@@ -5,6 +5,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -14,49 +17,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Repository = void 0;
 const inversify_1 = require("inversify");
-let Repository = class Repository {
-    constructor(model) {
-        this.model = model;
+const types_1 = __importDefault(require("../container/types"));
+let TagService = class TagService {
+    constructor(tagRepository) {
+        this.tagRepository = tagRepository;
     }
-    findById(id) {
+    getTagFrequencyMap(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.model.findUnique({ where: { id: Number(id) } });
-        });
-    }
-    findFirst(filter) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.model.findFirst({ where: filter });
-        });
-    }
-    findMany(options) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.model.findMany(options || {});
-        });
-    }
-    create(data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.model.create({ data });
-        });
-    }
-    update(id, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.model.update({
-                where: { id: Number(id) },
-                data,
-            });
-        });
-    }
-    delete(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.model.delete({ where: { id: Number(id) } });
-            return true;
+            const tagFrequencies = yield this.tagRepository.getUserTagsFrequency(userId);
+            const tagsFrequencyMap = new Map();
+            for (const tag of tagFrequencies) {
+                tagsFrequencyMap.set(tag.name, tag.count);
+            }
+            return tagsFrequencyMap;
         });
     }
 };
-exports.Repository = Repository;
-exports.Repository = Repository = __decorate([
-    (0, inversify_1.injectable)()
-], Repository);
+TagService = __decorate([
+    (0, inversify_1.injectable)(),
+    __param(0, (0, inversify_1.inject)(types_1.default.TagRepository))
+], TagService);
+exports.default = TagService;
