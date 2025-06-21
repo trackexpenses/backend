@@ -8,7 +8,7 @@ export class ExpenseRepository extends Repository<any> {
     constructor(@inject(TYPES.PrismaClient) prisma: PrismaClient) {
         super(prisma.expense);
     }
-    async addExpense(tx: Prisma.TransactionClient, data: { amount: number; description: string; userId: number }) {
+    async addExpense(tx: Prisma.TransactionClient, data: { amount: number; description?: string; userId: number }) {
         return tx.expense.create({ data });
     }
 

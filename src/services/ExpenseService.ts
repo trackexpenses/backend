@@ -37,7 +37,7 @@ export default class ExpenseService {
 
         try {
             const expense = await prisma.$transaction(async (tx) => {
-                const expense = await this.expenseRepository.addExpense(tx, { amount, description: description ?? '', userId });
+                const expense = await this.expenseRepository.addExpense(tx, { amount, description, userId });
 
                 const tags = await this.tagRepository.createOrUpsertTags(tx, expenseTags, userId);
 
