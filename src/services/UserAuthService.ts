@@ -27,7 +27,7 @@ export default class UserAuthService {
                 email: userParams.email,
                 password: await this.hashPassword(userParams.password)
             });
-            const mappedUser = await this.userMapper.toDto(user)
+            const mappedUser = this.userMapper.toDto(user)
             const device = this.getDeviceTokens(user.id)
 
             return { user: mappedUser, status: ApiStatus.SUCCESS, device };
@@ -58,7 +58,7 @@ export default class UserAuthService {
         }
 
         const device = this.getDeviceTokens(user.id)
-        return { user: await this.userMapper.toDto(user), status: ApiStatus.SUCCESS, device }
+        return { user: this.userMapper.toDto(user), status: ApiStatus.SUCCESS, device }
     }
 
     private async hashPassword(plainPassword: string): Promise<string> {

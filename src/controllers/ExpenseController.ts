@@ -40,6 +40,14 @@ class ExpenseController {
 
         res.status(200).send({ expenses });
     }
+
+    @httpGet("/analytics")
+    public async getExpensesSummary(req: express.Request, res: express.Response) {
+        const user = (req as any).user as User
+
+        const analytics = await this.expenseService.getUserExpensesAnalytics(user.id)
+        res.status(200).send({ analytics });
+    }
 }
 
 export { ExpenseController };

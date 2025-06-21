@@ -6,7 +6,7 @@ import UserDto from "../dto/UserDto";
 export default class UserMapper {
     constructor() { }
 
-    public async toDto(document: User): Promise<UserDto> {
+    public toDto(document: User): UserDto {
 
         return {
             id: document.id,
