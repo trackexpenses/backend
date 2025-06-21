@@ -15,6 +15,9 @@ export class ExpenseRepository extends Repository<any> {
     async getUserExpenses(userId: number) {
         const expenses = await this.findMany({
             where: { userId },
+            orderBy: {
+                createdAt: 'desc',
+            },
             include: {
                 tags: {
                     select: {

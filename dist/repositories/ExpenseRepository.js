@@ -38,6 +38,9 @@ let ExpenseRepository = class ExpenseRepository extends Repository_1.Repository 
         return __awaiter(this, void 0, void 0, function* () {
             const expenses = yield this.findMany({
                 where: { userId },
+                orderBy: {
+                    createdAt: 'desc',
+                },
                 include: {
                     tags: {
                         select: {
