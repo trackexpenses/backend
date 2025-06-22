@@ -32,7 +32,7 @@ class AuthController {
         const userParams = req.body;
         const { status, errorMessage, user, device } = await this.userAuthService.login(userParams)
         if (status === ApiStatus.FAILURE) {
-            return res.status(422).send({ message: errorMessage });
+            return res.status(401).send({ message: errorMessage });
 
         }
         res.status(200).send({ user, device });
