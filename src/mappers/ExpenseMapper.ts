@@ -16,15 +16,19 @@ export default class ExpenseMapper {
             tags: (document as any).tags.map((tag: any) => tag.tag.name)
         };
     }
-
     public toAnalyticsDto(analytics: any): ExpenseAnalyticsDto[] {
-        const formattedAnalytics =
-            Object.entries(analytics).map(([tagName, dataRaw], index) => {
+        const sortByTotalDesc = ([, aRaw]: [string, any], [, bRaw]: [string, any]) =>
+            (bRaw as { total: number }).total - (aRaw as { total: number }).total;
+
+        const formattedAnalytics = Object.entries(analytics)
+            .sort(sortByTotalDesc)
+            .map(([tagName, dataRaw], index) => {
                 const data = dataRaw as { total: number; children: any };
 
-                const children = tagName === OTHER_TAG
-                    ? this.formatOtherChildren(data.children)
-                    : this.toChildExpenseDto(data.children);
+                const children =
+                    tagName === OTHER_TAG
+                        ? this.formatOtherChildren(data.children)
+                        : this.toChildExpenseDto(data.children);
 
                 return {
                     label: tagName,
@@ -32,25 +36,33 @@ export default class ExpenseMapper {
                     children,
                     color: colorPalette[index % colorPalette.length],
                 };
-            })
+            });
 
-        return formattedAnalytics
+        return formattedAnalytics;
     }
 
     private toChildExpenseDto(childTags: Record<string, any>) {
-        return Object.entries(childTags).map(([childTag, childData]) => ({
-            tags: [childTag],
-            amount: childData.total,
-            description: childData.description,
-        }));
+        const sortByAmountDesc = (a: any, b: any) => b.amount - a.amount;
+
+        return Object.entries(childTags)
+            .map(([childTag, childData]) => ({
+                tags: [childTag],
+                amount: childData.total,
+                description: childData.description,
+            }))
+            .sort(sortByAmountDesc);
     }
 
     private formatOtherChildren(children: any[]) {
-        return children.map((expense: any) => ({
-            tags: expense.tags,
-            amount: expense.amount,
-            description: expense.description,
-        }));
+        const sortByAmountDesc = (a: any, b: any) => b.amount - a.amount;
+
+        return children
+            .map((expense: any) => ({
+                tags: expense.tags,
+                amount: expense.amount,
+                description: expense.description,
+            }))
+            .sort(sortByAmountDesc);
     }
 
 }

@@ -19,7 +19,10 @@ let ExpenseMapper = class ExpenseMapper {
         };
     }
     toAnalyticsDto(analytics) {
-        const formattedAnalytics = Object.entries(analytics).map(([tagName, dataRaw], index) => {
+        const sortByTotalDesc = ([, aRaw], [, bRaw]) => bRaw.total - aRaw.total;
+        const formattedAnalytics = Object.entries(analytics)
+            .sort(sortByTotalDesc)
+            .map(([tagName, dataRaw], index) => {
             const data = dataRaw;
             const children = tagName === ExpenseService_1.OTHER_TAG
                 ? this.formatOtherChildren(data.children)
@@ -34,18 +37,24 @@ let ExpenseMapper = class ExpenseMapper {
         return formattedAnalytics;
     }
     toChildExpenseDto(childTags) {
-        return Object.entries(childTags).map(([childTag, childData]) => ({
+        const sortByAmountDesc = (a, b) => b.amount - a.amount;
+        return Object.entries(childTags)
+            .map(([childTag, childData]) => ({
             tags: [childTag],
             amount: childData.total,
             description: childData.description,
-        }));
+        }))
+            .sort(sortByAmountDesc);
     }
     formatOtherChildren(children) {
-        return children.map((expense) => ({
+        const sortByAmountDesc = (a, b) => b.amount - a.amount;
+        return children
+            .map((expense) => ({
             tags: expense.tags,
             amount: expense.amount,
             description: expense.description,
-        }));
+        }))
+            .sort(sortByAmountDesc);
     }
 };
 ExpenseMapper = __decorate([
