@@ -51,6 +51,22 @@ let TagRepository = class TagRepository extends Repository_1.Repository {
     `;
         });
     }
+    getUserTagsWithTotalExpenses(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield prismaClient_1.default.$queryRaw `
+    SELECT 
+        t.id AS id, 
+        t.name AS name, 
+        SUM(e.amount) AS total
+    FROM Tag t
+    JOIN ExpenseTag et ON et.tagId = t.id
+    JOIN Expense e ON e.id = et.expenseId
+    WHERE t.userId = ${userId}
+    GROUP BY t.id, t.name
+    ORDER BY total DESC;
+    `;
+        });
+    }
 };
 exports.TagRepository = TagRepository;
 exports.TagRepository = TagRepository = __decorate([

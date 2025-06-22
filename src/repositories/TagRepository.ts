@@ -35,4 +35,21 @@ export class TagRepository extends Repository<any> {
     `;
 
     }
+    async getUserTagsWithTotalExpenses(userId: number) {
+        return await prisma.$queryRaw<
+            Array<{ id: number; name: string; total: number }>
+        >`
+    SELECT 
+        t.id AS id, 
+        t.name AS name, 
+        SUM(e.amount) AS total
+    FROM Tag t
+    JOIN ExpenseTag et ON et.tagId = t.id
+    JOIN Expense e ON e.id = et.expenseId
+    WHERE t.userId = ${userId}
+    GROUP BY t.id, t.name
+    ORDER BY total DESC;
+    `;
+    }
+
 }
