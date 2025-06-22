@@ -177,7 +177,7 @@ export default class ExpenseService {
         for (const [tag, data] of Object.entries(tagSummary)) {
             const percentage = (data.total / totalAmount) * 100;
 
-            if (percentage >= MIN_STAND_ALONE_PERCENTAGE) {
+            if (tag !== OTHER_TAG && percentage >= MIN_STAND_ALONE_PERCENTAGE) {
                 result[tag] = data;
             } else {
                 if (!result[OTHER_TAG]) {

@@ -162,7 +162,7 @@ let ExpenseService = class ExpenseService {
         const MIN_STAND_ALONE_PERCENTAGE = 5;
         for (const [tag, data] of Object.entries(tagSummary)) {
             const percentage = (data.total / totalAmount) * 100;
-            if (percentage >= MIN_STAND_ALONE_PERCENTAGE) {
+            if (tag !== exports.OTHER_TAG && percentage >= MIN_STAND_ALONE_PERCENTAGE) {
                 result[tag] = data;
             }
             else {
