@@ -155,7 +155,10 @@ let ExpenseService = class ExpenseService {
                     result[exports.OTHER_TAG] = { total: 0, children: [] };
                 }
                 result[exports.OTHER_TAG].total += data.total;
-                result[exports.OTHER_TAG].children.push(...data.children);
+                const children = tag === exports.OTHER_TAG
+                    ? data.children || []
+                    : (data.children || []).map((child) => (Object.assign(Object.assign({}, child), { tags: [...(child.tags || []), tag] })));
+                result[exports.OTHER_TAG].children.push(...children);
             }
         }
         return result;

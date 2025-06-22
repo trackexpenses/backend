@@ -164,7 +164,14 @@ export default class ExpenseService {
                     result[OTHER_TAG] = { total: 0, children: [] };
                 }
                 result[OTHER_TAG].total += data.total;
-                result[OTHER_TAG].children.push(...data.children);
+                const children = tag === OTHER_TAG
+                    ? data.children || []
+                    : (data.children || []).map((child: any) => ({
+                        ...child,
+                        tags: [...(child.tags || []), tag],
+                    }));
+
+                result[OTHER_TAG].children.push(...children)
             }
         }
         return result;
