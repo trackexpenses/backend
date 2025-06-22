@@ -44,8 +44,10 @@ class ExpenseController {
     @httpGet("/analytics")
     public async getExpensesSummary(req: express.Request, res: express.Response) {
         const user = (req as any).user as User
+        const startDate = req.query.startDate as string
+        const endDate = req.query.endDate as string
 
-        const analytics = await this.expenseService.getUserExpensesAnalytics(user.id)
+        const analytics = await this.expenseService.getUserExpensesAnalytics(user.id, startDate, endDate)
         res.status(200).send({ analytics });
     }
 }

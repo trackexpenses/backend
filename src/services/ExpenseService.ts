@@ -62,16 +62,16 @@ export default class ExpenseService {
         return true
     }
 
-    public async getUserExpenses(userId: number) {
-        const expenses = await this.expenseRepository.getUserExpenses(userId);
+    public async getUserExpenses(userId: number, filter?: any) {
+        const expenses = await this.expenseRepository.getUserExpenses(userId, filter);
 
         const mappedExpenses = expenses.map(expense => this.expenseMapper.toDto(expense))
         return mappedExpenses;
     }
 
-    public async getUserExpensesAnalytics(userId: number) {
+    public async getUserExpensesAnalytics(userId: number, startDate?: string, endDate?: string) {
         const tagsFrequencyMap = await this.tagService.getTagFrequencyMap(userId)
-        const analytics = await this.getParentExpensesTagsDetails(userId, tagsFrequencyMap)
+        const analytics = await this.getParentExpensesTagsDetails(userId, tagsFrequencyMap, startDate, endDate)
 
         for (const [tagName, data] of Object.entries(analytics)) {
             if (tagName === OTHER_TAG) {
@@ -90,10 +90,30 @@ export default class ExpenseService {
     }
 
 
-    private async getParentExpensesTagsDetails(userId: number, tagsFrequencyMap: Map<string, number>) {
-        const userExpenses = await this.getUserExpenses(userId);
+    private async getParentExpensesTagsDetails(userId: number, tagsFrequencyMap: Map<string, number>, startDate?: string, endDate?: string) {
+        const dateFilter = this.getDateFilter(startDate, endDate)
+
+        const userExpenses = await this.getUserExpenses(userId, dateFilter);
         const tagSummary = await this.getTagBreakDown(userExpenses, tagsFrequencyMap)
         return tagSummary
+    }
+
+    private getDateFilter(startDate?: string, endDate?: string) {
+        if (!startDate || !endDate) {
+            return {}
+        }
+        const startDateObject = new Date(startDate);
+        startDateObject.setHours(0, 0, 0, 0);
+
+        const endDateObjet = new Date(endDate);
+
+        return {
+            createdAt: {
+                gte: startDateObject,
+                lte: endDateObjet,
+            },
+        }
+
     }
 
     private async getTagBreakDown(userExpenses: any, tagsFrequencyMap: Map<string, number>) {

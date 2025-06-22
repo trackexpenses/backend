@@ -62,17 +62,17 @@ let ExpenseService = class ExpenseService {
         }
         return true;
     }
-    getUserExpenses(userId) {
+    getUserExpenses(userId, filter) {
         return __awaiter(this, void 0, void 0, function* () {
-            const expenses = yield this.expenseRepository.getUserExpenses(userId);
+            const expenses = yield this.expenseRepository.getUserExpenses(userId, filter);
             const mappedExpenses = expenses.map(expense => this.expenseMapper.toDto(expense));
             return mappedExpenses;
         });
     }
-    getUserExpensesAnalytics(userId) {
+    getUserExpensesAnalytics(userId, startDate, endDate) {
         return __awaiter(this, void 0, void 0, function* () {
             const tagsFrequencyMap = yield this.tagService.getTagFrequencyMap(userId);
-            const analytics = yield this.getParentExpensesTagsDetails(userId, tagsFrequencyMap);
+            const analytics = yield this.getParentExpensesTagsDetails(userId, tagsFrequencyMap, startDate, endDate);
             for (const [tagName, data] of Object.entries(analytics)) {
                 if (tagName === exports.OTHER_TAG) {
                     analytics[tagName] = data;
@@ -86,12 +86,27 @@ let ExpenseService = class ExpenseService {
             return formattedAnalytics;
         });
     }
-    getParentExpensesTagsDetails(userId, tagsFrequencyMap) {
+    getParentExpensesTagsDetails(userId, tagsFrequencyMap, startDate, endDate) {
         return __awaiter(this, void 0, void 0, function* () {
-            const userExpenses = yield this.getUserExpenses(userId);
+            const dateFilter = this.getDateFilter(startDate, endDate);
+            const userExpenses = yield this.getUserExpenses(userId, dateFilter);
             const tagSummary = yield this.getTagBreakDown(userExpenses, tagsFrequencyMap);
             return tagSummary;
         });
+    }
+    getDateFilter(startDate, endDate) {
+        if (!startDate || !endDate) {
+            return {};
+        }
+        const startDateObject = new Date(startDate);
+        startDateObject.setHours(0, 0, 0, 0);
+        const endDateObjet = new Date(endDate);
+        return {
+            createdAt: {
+                gte: startDateObject,
+                lte: endDateObjet,
+            },
+        };
     }
     getTagBreakDown(userExpenses, tagsFrequencyMap) {
         return __awaiter(this, void 0, void 0, function* () {

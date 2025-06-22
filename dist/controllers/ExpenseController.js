@@ -52,7 +52,9 @@ let ExpenseController = class ExpenseController {
     getExpensesSummary(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = req.user;
-            const analytics = yield this.expenseService.getUserExpensesAnalytics(user.id);
+            const startDate = req.query.startDate;
+            const endDate = req.query.endDate;
+            const analytics = yield this.expenseService.getUserExpensesAnalytics(user.id, startDate, endDate);
             res.status(200).send({ analytics });
         });
     }

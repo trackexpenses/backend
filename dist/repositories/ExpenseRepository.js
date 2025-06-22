@@ -34,10 +34,10 @@ let ExpenseRepository = class ExpenseRepository extends Repository_1.Repository 
             return tx.expense.create({ data });
         });
     }
-    getUserExpenses(userId) {
+    getUserExpenses(userId, filter) {
         return __awaiter(this, void 0, void 0, function* () {
             const expenses = yield this.findMany({
-                where: { userId },
+                where: Object.assign({ userId }, filter),
                 orderBy: {
                     createdAt: 'desc',
                 },

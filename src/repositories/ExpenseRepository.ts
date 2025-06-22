@@ -12,9 +12,12 @@ export class ExpenseRepository extends Repository<any> {
         return tx.expense.create({ data });
     }
 
-    async getUserExpenses(userId: number) {
+    async getUserExpenses(userId: number, filter?: any) {
         const expenses = await this.findMany({
-            where: { userId },
+            where: {
+                userId,
+                ...filter
+            },
             orderBy: {
                 createdAt: 'desc',
             },
