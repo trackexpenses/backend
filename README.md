@@ -87,3 +87,4 @@ Then open your browser at:
 ```
 http://localhost:5555
 ```
+- 📘 [API Documentation (Swagger)](https://app.swaggerhub.com/apis-docs/YOUSSRBARAKAT22/Expense-Tracker/1.0.0)
