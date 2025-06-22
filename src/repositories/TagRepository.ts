@@ -14,7 +14,7 @@ export class TagRepository extends Repository<any> {
         return Promise.all(
             tagNames.map(tagName =>
                 tx.tag.upsert({
-                    where: { name_userId: { name: tagName, userId } },
+                    where: { name_userId: { name: tagName.toLowerCase(), userId } },
                     update: {},
                     create: { name: tagName, userId },
                 })

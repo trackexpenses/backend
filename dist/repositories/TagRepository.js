@@ -33,7 +33,7 @@ let TagRepository = class TagRepository extends Repository_1.Repository {
     createOrUpsertTags(tx, tagNames, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             return Promise.all(tagNames.map(tagName => tx.tag.upsert({
-                where: { name_userId: { name: tagName, userId } },
+                where: { name_userId: { name: tagName.toLowerCase(), userId } },
                 update: {},
                 create: { name: tagName, userId },
             })));

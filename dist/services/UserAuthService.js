@@ -38,7 +38,7 @@ let UserAuthService = class UserAuthService {
             try {
                 const user = yield this.userRepository.create({
                     name: userParams.name,
-                    email: userParams.email,
+                    email: userParams.email.toLowerCase(),
                     password: yield this.hashPassword(userParams.password)
                 });
                 const mappedUser = this.userMapper.toDto(user);
@@ -58,7 +58,7 @@ let UserAuthService = class UserAuthService {
     login(userParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const { email, password } = userParams;
-            const user = yield this.userRepository.findFirst({ email });
+            const user = yield this.userRepository.findFirst({ email: email.toLowerCase() });
             if (!user) {
                 return { status: IUser_1.ApiStatus.FAILURE, errorMessage: 'Invalid email or password' };
             }

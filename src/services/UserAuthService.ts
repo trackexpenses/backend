@@ -24,7 +24,7 @@ export default class UserAuthService {
         try {
             const user = await this.userRepository.create({
                 name: userParams.name,
-                email: userParams.email,
+                email: userParams.email.toLowerCase(),
                 password: await this.hashPassword(userParams.password)
             });
             const mappedUser = this.userMapper.toDto(user)
@@ -45,7 +45,7 @@ export default class UserAuthService {
     public async login(userParams: IUserLoginParams): Promise<IUserAuthResult> {
 
         const { email, password } = userParams
-        const user = await this.userRepository.findFirst({ email });
+        const user = await this.userRepository.findFirst({ email: email.toLowerCase() });
 
         if (!user) {
             return { status: ApiStatus.FAILURE, errorMessage: 'Invalid email or password' };
