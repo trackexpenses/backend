@@ -28,6 +28,6 @@ dotenv.config();
 exports.default = {
     port: +(process.env.PORT || 3000),
     jwt: {
-        secretKey: process.env.JWT_SECRET_KEY
+        secretKey: process.env.JWT_SECRET_KEY || 'secret-key'
     },
 };
