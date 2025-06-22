@@ -8,40 +8,43 @@ datasource db {
 }
 
 model User {
-  id        Int     @id @default(autoincrement())
-  name      String
-  email     String     @unique
-  password  String
-  expenses  Expense[]
-  tags      Tag[]
+  id       Int       @id @default(autoincrement())
+  name     String
+  email    String    @unique
+  password String
+  expenses Expense[]
+  tags     Tag[]
 }
 
 model Expense {
-  id          Int     @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   amount      Float
   description String?
-  createdAt   DateTime       @default(now())
+  createdAt   DateTime     @default(now())
   userId      Int
-  user        User           @relation(fields: [userId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
   tags        ExpenseTag[]
+
+  @@index([userId])
 }
 
 model Tag {
-  id       Int     @id @default(autoincrement())
-  name    String
-  userId  Int
-  user    User       @relation(fields: [userId], references: [id])
+  id       Int          @id @default(autoincrement())
+  name     String
+  userId   Int
+  user     User         @relation(fields: [userId], references: [id])
   expenses ExpenseTag[]
 
-  @@unique([name, userId]) 
+  @@unique([name, userId])
+  @@index([userId])
 }
 
 model ExpenseTag {
   expenseId Int
   tagId     Int
 
-  expense   Expense @relation(fields: [expenseId], references: [id])
-  tag       Tag     @relation(fields: [tagId], references: [id])
+  expense Expense @relation(fields: [expenseId], references: [id])
+  tag     Tag     @relation(fields: [tagId], references: [id])
 
-  @@id([expenseId, tagId]) 
+  @@id([expenseId, tagId])
 }
