@@ -70,13 +70,14 @@ export default class ExpenseService {
     }
 
     public async getUserExpensesAnalytics(userId: number) {
-        const analytics = await this.getParentExpensesTagsDetails(userId)
+        const tagsFrequencyMap = await this.tagService.getTagFrequencyMap(userId)
+        const analytics = await this.getParentExpensesTagsDetails(userId, tagsFrequencyMap)
 
         for (const [tagName, data] of Object.entries(analytics)) {
             if (tagName === OTHER_TAG) {
                 analytics[tagName] = data;
             } else {
-                const childTags = await this.getTagBreakDown(data.children, userId);
+                const childTags = await this.getTagBreakDown(data.children, tagsFrequencyMap);
                 analytics[tagName] = {
                     ...data,
                     children: childTags,
@@ -89,32 +90,25 @@ export default class ExpenseService {
     }
 
 
-    private async getParentExpensesTagsDetails(userId: number) {
+    private async getParentExpensesTagsDetails(userId: number, tagsFrequencyMap: Map<string, number>) {
         const userExpenses = await this.getUserExpenses(userId);
-        const tagSummary = await this.getTagBreakDown(userExpenses, userId)
+        const tagSummary = await this.getTagBreakDown(userExpenses, tagsFrequencyMap)
         return tagSummary
     }
 
-    private async getTagBreakDown(userExpenses: any, userId: number) {
-        const tagSummary: Record<string, { total: number; children: typeof userExpenses, description?: string }> = {
-            other: {
-                total: 0,
-                children: [],
-            }
-        };
+    private async getTagBreakDown(userExpenses: any, tagsFrequencyMap: Map<string, number>) {
+        const tagSummary: Record<string, { total: number; children: typeof userExpenses, description?: string }> = {};
 
         for (const expense of userExpenses) {
             const expenseTags = expense.tags;
             if (expenseTags.length === 0) {
-                tagSummary[OTHER_TAG].total += expense.amount;
-                tagSummary[OTHER_TAG].children.push(expense);
+                this.addToOther(tagSummary, expense)
                 continue;
             }
 
-            const parentTag = await this.getExpenseParentTag(expenseTags, userId)
+            const parentTag = await this.getExpenseParentTag(expenseTags, tagsFrequencyMap)
             if (!parentTag) {
-                tagSummary[OTHER_TAG].total += expense.amount;
-                tagSummary[OTHER_TAG].children.push(expense);
+                this.addToOther(tagSummary, expense)
                 continue;
             }
 
@@ -129,21 +123,13 @@ export default class ExpenseService {
             tagSummary[parentTag].children.push({ ...expense, tags: expense.tags.filter((tag: string) => tag !== parentTag) });
         }
 
-        const filteredTagSummary = Object.entries(tagSummary).reduce((acc, [key, value]) => {
-            if (value.total > 0) {
-                acc[key] = value;
-            }
-            return acc;
-        }, {} as typeof tagSummary);
-
-        return filteredTagSummary;
+        return this.groupLowPercentageTags(tagSummary)
     }
 
-    private async getExpenseParentTag(expenseTags: string[], userId: number): Promise<string | null> {
+    private async getExpenseParentTag(expenseTags: string[], tagsFrequencyMap: Map<string, number>): Promise<string | null> {
         let parentTag: string | null = null;
         let maxFrequency = -1;
 
-        const tagsFrequencyMap = await this.tagService.getTagFrequencyMap(userId)
 
         for (const tag of expenseTags) {
             const frequency = tagsFrequencyMap.get(tag) ?? 0;
@@ -154,6 +140,36 @@ export default class ExpenseService {
         }
         return parentTag
     }
+
+    private addToOther(tagSummary: Record<string, any>, expense: any) {
+        if (!tagSummary[OTHER_TAG]) {
+            tagSummary[OTHER_TAG] = { total: 0, children: [] };
+        }
+        tagSummary[OTHER_TAG].total += expense.amount;
+        tagSummary[OTHER_TAG].children.push(expense);
+    }
+
+    private groupLowPercentageTags(tagSummary: Record<string, any>) {
+        const totalAmount = Object.values(tagSummary).reduce((sum, tag) => sum + tag.total, 0);
+        const result: typeof tagSummary = {};
+        const MIN_STAND_ALONE_PERCENTAGE = 5
+
+        for (const [tag, data] of Object.entries(tagSummary)) {
+            const percentage = (data.total / totalAmount) * 100;
+
+            if (percentage >= MIN_STAND_ALONE_PERCENTAGE) {
+                result[tag] = data;
+            } else {
+                if (!result[OTHER_TAG]) {
+                    result[OTHER_TAG] = { total: 0, children: [] };
+                }
+                result[OTHER_TAG].total += data.total;
+                result[OTHER_TAG].children.push(...data.children);
+            }
+        }
+        return result;
+    }
+
 }
 
 

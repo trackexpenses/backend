@@ -42,7 +42,6 @@ let ExpenseMapper = class ExpenseMapper {
             .map(([childTag, childData]) => ({
             tags: [childTag],
             amount: childData.total,
-            description: childData.description,
         }))
             .sort(sortByAmountDesc);
     }

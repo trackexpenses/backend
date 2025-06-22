@@ -71,13 +71,14 @@ let ExpenseService = class ExpenseService {
     }
     getUserExpensesAnalytics(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const analytics = yield this.getParentExpensesTagsDetails(userId);
+            const tagsFrequencyMap = yield this.tagService.getTagFrequencyMap(userId);
+            const analytics = yield this.getParentExpensesTagsDetails(userId, tagsFrequencyMap);
             for (const [tagName, data] of Object.entries(analytics)) {
                 if (tagName === exports.OTHER_TAG) {
                     analytics[tagName] = data;
                 }
                 else {
-                    const childTags = yield this.getTagBreakDown(data.children, userId);
+                    const childTags = yield this.getTagBreakDown(data.children, tagsFrequencyMap);
                     analytics[tagName] = Object.assign(Object.assign({}, data), { children: childTags });
                 }
             }
@@ -85,32 +86,25 @@ let ExpenseService = class ExpenseService {
             return formattedAnalytics;
         });
     }
-    getParentExpensesTagsDetails(userId) {
+    getParentExpensesTagsDetails(userId, tagsFrequencyMap) {
         return __awaiter(this, void 0, void 0, function* () {
             const userExpenses = yield this.getUserExpenses(userId);
-            const tagSummary = yield this.getTagBreakDown(userExpenses, userId);
+            const tagSummary = yield this.getTagBreakDown(userExpenses, tagsFrequencyMap);
             return tagSummary;
         });
     }
-    getTagBreakDown(userExpenses, userId) {
+    getTagBreakDown(userExpenses, tagsFrequencyMap) {
         return __awaiter(this, void 0, void 0, function* () {
-            const tagSummary = {
-                other: {
-                    total: 0,
-                    children: [],
-                }
-            };
+            const tagSummary = {};
             for (const expense of userExpenses) {
                 const expenseTags = expense.tags;
                 if (expenseTags.length === 0) {
-                    tagSummary[exports.OTHER_TAG].total += expense.amount;
-                    tagSummary[exports.OTHER_TAG].children.push(expense);
+                    this.addToOther(tagSummary, expense);
                     continue;
                 }
-                const parentTag = yield this.getExpenseParentTag(expenseTags, userId);
+                const parentTag = yield this.getExpenseParentTag(expenseTags, tagsFrequencyMap);
                 if (!parentTag) {
-                    tagSummary[exports.OTHER_TAG].total += expense.amount;
-                    tagSummary[exports.OTHER_TAG].children.push(expense);
+                    this.addToOther(tagSummary, expense);
                     continue;
                 }
                 if (!tagSummary[parentTag]) {
@@ -122,21 +116,14 @@ let ExpenseService = class ExpenseService {
                 tagSummary[parentTag].total += expense.amount;
                 tagSummary[parentTag].children.push(Object.assign(Object.assign({}, expense), { tags: expense.tags.filter((tag) => tag !== parentTag) }));
             }
-            const filteredTagSummary = Object.entries(tagSummary).reduce((acc, [key, value]) => {
-                if (value.total > 0) {
-                    acc[key] = value;
-                }
-                return acc;
-            }, {});
-            return filteredTagSummary;
+            return this.groupLowPercentageTags(tagSummary);
         });
     }
-    getExpenseParentTag(expenseTags, userId) {
+    getExpenseParentTag(expenseTags, tagsFrequencyMap) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a;
             let parentTag = null;
             let maxFrequency = -1;
-            const tagsFrequencyMap = yield this.tagService.getTagFrequencyMap(userId);
             for (const tag of expenseTags) {
                 const frequency = (_a = tagsFrequencyMap.get(tag)) !== null && _a !== void 0 ? _a : 0;
                 if (frequency > maxFrequency) {
@@ -146,6 +133,32 @@ let ExpenseService = class ExpenseService {
             }
             return parentTag;
         });
+    }
+    addToOther(tagSummary, expense) {
+        if (!tagSummary[exports.OTHER_TAG]) {
+            tagSummary[exports.OTHER_TAG] = { total: 0, children: [] };
+        }
+        tagSummary[exports.OTHER_TAG].total += expense.amount;
+        tagSummary[exports.OTHER_TAG].children.push(expense);
+    }
+    groupLowPercentageTags(tagSummary) {
+        const totalAmount = Object.values(tagSummary).reduce((sum, tag) => sum + tag.total, 0);
+        const result = {};
+        const MIN_STAND_ALONE_PERCENTAGE = 5;
+        for (const [tag, data] of Object.entries(tagSummary)) {
+            const percentage = (data.total / totalAmount) * 100;
+            if (percentage >= MIN_STAND_ALONE_PERCENTAGE) {
+                result[tag] = data;
+            }
+            else {
+                if (!result[exports.OTHER_TAG]) {
+                    result[exports.OTHER_TAG] = { total: 0, children: [] };
+                }
+                result[exports.OTHER_TAG].total += data.total;
+                result[exports.OTHER_TAG].children.push(...data.children);
+            }
+        }
+        return result;
     }
 };
 ExpenseService = __decorate([
