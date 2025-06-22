@@ -3,6 +3,11 @@
 A backend service built with **Node.js**, **Prisma**, and **MySQL** for tracking expenses.
 
 ---
+## 📚 API Documentation
+
+👉 **[📘 View Full API Docs on SwaggerHub](https://app.swaggerhub.com/apis-docs/YOUSSRBARAKAT22/Expense-Tracker/1.0.0)**
+
+---
 
 ## 🚀 Getting Started
 
@@ -87,4 +92,3 @@ Then open your browser at:
 ```
 http://localhost:5555
 ```
-- 📘 [API Documentation (Swagger)](https://app.swaggerhub.com/apis-docs/YOUSSRBARAKAT22/Expense-Tracker/1.0.0)
